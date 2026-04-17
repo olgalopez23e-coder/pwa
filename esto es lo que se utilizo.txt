@@ -1,0 +1,227 @@
+================================================================================
+PROYECTOS EN EJECUCIÓN - POKÉDEX PWA
+================================================================================
+
+PROYECTO 1: BACKEND API (Node.js + Express + MongoDB)
+-----------------------------------
+Ubicación: backend-api/
+Puerto: 5000
+URL: http://localhost:5000
+
+ARCHIVOS PRINCIPALES:
+- backend-api/src/index.js → Servidor Express principal
+- backend-api/package.json → Dependencias y scripts
+- backend-api/.env → Variables de entorno (MONGODB_URI, JWT_SECRET, VAPID keys)
+
+RUTAS DE LA API:
+- backend-api/src/routes/auth.js → Autenticación (login, register)
+- backend-api/src/routes/friends.js → Sistema de amigos (add-by-code, generate-code)
+- backend-api/src/routes/favorites.js → Pokémon favoritos
+- backend-api/src/routes/teams.js → Equipos de batalla
+- backend-api/src/routes/battles.js → Sistema de batallas
+- backend-api/src/routes/pokemon.js → Búsqueda de Pokémon
+- backend-api/src/routes/push.js → Notificaciones push
+
+MODELOS DE DATOS (MongoDB):
+- backend-api/src/models/User.js → Usuario (email, password, friendCode, pushSubscription)
+- backend-api/src/models/Friend.js → Relación de amistades
+- backend-api/src/models/Team.js → Equipos de Pokémon
+- backend-api/src/models/Battle.js → Histórico de batallas
+- backend-api/src/models/Favorite.js → Pokémon favoritos
+
+MIDDLEWARE:
+- backend-api/src/middleware/auth.js → Protección JWT de rutas
+
+SCRIPTS DE MANTENIMIENTO:
+- backend-api/cleanup-db.js → Limpieza de documentos corruptos
+- backend-api/add-friend-codes.js → Agregar codes a usuarios antiguos
+- backend-api/inspect-friends.js → Inspeccionar base de datos
+
+---
+
+PROYECTO 2: FRONTEND (Vue 3 + Vite + PWA)
+-----------------------------------
+Ubicación: frontend/
+Puerto: 5173 (desarrollo)
+URL: http://localhost:5173
+
+ARCHIVOS PRINCIPALES:
+- frontend/src/main.js → Punto de entrada, registro de SW y subscripción push
+- frontend/src/App.vue → Componente raíz, navbar y router-view
+- frontend/vite.config.js → Configuración de Vite
+- frontend/package.json → Dependencias (Vue, Axios, Vite)
+- frontend/jsconfig.json → Configuración de JavaScript/paths
+
+SERVICE WORKER (PWA):
+- frontend/public/sw.js → Service Worker (caché, sync, push notifications)
+- frontend/public/manifest.json → Manifest PWA (ícono, nombre, colores)
+
+SERVICIOS (API Client):
+- frontend/src/services/api.js → Cliente Axios con interceptores JWT y offline
+- frontend/src/services/db.js → IndexedDB para almacenamiento offline
+- frontend/src/services/notifications.js → Gestión de notificaciones push
+
+VISTAS (Páginas):
+- frontend/src/views/Home.vue → Explorador de Pokémon (página principal)
+- frontend/src/views/Login.vue → Inicio de sesión
+- frontend/src/views/Register.vue → Registro de usuario
+- frontend/src/views/Favoritos.vue → Pokémon favoritos del usuario
+- frontend/src/views/Equipos.vue → Gestión de equipos para batalla
+- frontend/src/views/Amigos.vue → Sistema de amigos + notificaciones
+- frontend/src/views/Batallas.vue → Duelos 1v1 contra amigos
+- frontend/src/views/PokemonDetail.vue → Detalles de Pokémon individual
+
+COMPONENTES:
+- frontend/src/components/PokemonCard.vue → Tarjeta de Pokémon reutilizable
+
+ENRUTADOR:
+- frontend/src/router/index.js → Configuración de rutas y protección JWT
+
+ESTILOS:
+- frontend/src/style.css → Estilos globales CSS
+- frontend/tailwind.config.js → Configuración de Tailwind CSS
+- frontend/postcss.config.js → Configuración de PostCSS
+
+---
+
+BASE DE DATOS
+-----------------------------------
+Tipo: MongoDB
+Ubicación: MongoDB Atlas (aplicación cloud)
+Base de datos: pokemonpru
+
+COLECCIONES:
+- users → Usuarios registrados
+- friends → Relaciones de amistades bidireccionales
+- teams → Equipos de Pokémon por usuario
+- battles → Histórico de batallas
+- favorites → Pokémon favoritos por usuario
+
+CLAVES ÚNICAS E ÍNDICES:
+- users: email (unique), username (unique), friendCode (unique)
+- friends: userId + friendId (unique compound)
+
+---
+
+FLUJO DE EJECUCIÓN
+-----------------------------------
+
+1. INICIO DEL BACKEND:
+   cd backend-api
+   node src/index.js
+   → Conecta a MongoDB
+   → Limpia índices antiguos (friendCode_1)
+   → Carga lista de 1025 Pokémon en memoria
+   → Inicia servidor en puerto 5000
+
+2. INICIO DEL FRONTEND:
+   cd frontend
+   npm run dev
+   → Inicia Vite en puerto 5173
+   → Registra Service Worker
+   → Solicita permisos de notificación
+
+3. USUARIO ACCEDE A http://localhost:5173:
+   - Si no está autenticado → redirige a /login
+   - Si se autentica → obtiene JWT token
+   - Service Worker se suscribe a Push con /api/push/subscribe
+   - Frontend obtiene código amigo del usuario con /api/friends/generate-code
+
+4. SISTEMA DE AMIGOS:
+   - Usuario A genera código: GET /api/friends/generate-code
+   - Comparte código con Usuario B
+   - Usuario B usa código: POST /api/friends/add-by-code
+   - Backend envía notificación push a Usuario A vía WebPush
+
+---
+
+FLUJO DE NOTIFICACIONES PUSH
+-----------------------------------
+
+1. User A se autentica → Service Worker se suscribe
+2. Subscription se guarda en: POST /api/push/subscribe
+3. User B agrega a User A: POST /api/friends/add-by-code
+4. Backend consulta pushSubscription de User A en MongoDB
+5. Backend envía Push Notification vía web-push
+6. Service Worker recibe evento 'push'
+7. Se muestra notificación en escritorio del browser
+
+---
+
+VARIABLES DE ENTORNO (.env)
+-----------------------------------
+
+BACKEND:
+- MONGODB_URI = (URL de MongoDB Atlas)
+- JWT_SECRET = (clave secreta para firmar tokens JWT)
+- VAPID_PUBLIC_KEY = (clave pública para push notifications)
+- VAPID_PRIVATE_KEY = (clave privada para push notifications)
+- CORS_ORIGIN = http://localhost:5173
+- PORT = 5000
+
+FRONTEND:
+- VITE_API_URL = http://localhost:5000/api
+
+---
+
+TECNOLOGÍAS UTILIZADAS
+-----------------------------------
+
+BACKEND:
+✓ Node.js 24.12.0
+✓ Express 4.x
+✓ MongoDB + Mongoose
+✓ JWT (jsonwebtoken)
+✓ UUID (para códigos de amigo)
+✓ web-push (para notificaciones)
+✓ CORS
+
+FRONTEND:
+✓ Vue 3
+✓ Vite
+✓ Axios
+✓ Vue Router
+✓ Tailwind CSS
+✓ Service Workers (PWA)
+✓ IndexedDB
+✓ Push API
+✓ Notification API
+
+---
+
+ESTADO ACTUAL (16 abril 2026)
+-----------------------------------
+
+✅ FUNCIONANDO:
+- Sistema de autenticación JWT
+- Búsqueda de Pokémon
+- Favoritos y Equipos
+- Sistema bidireciconal de amigos
+- Códigos personales permanentes (generados al registro)
+- Service Worker y caché offline
+- Notificaciones push (cuando el usuario está suscrito)
+
+🔧 RECIENTEMENTE ARREGLADO:
+- Error 500 en /api/friends/add-by-code por índice friendCode_1
+- Limpieza automática de índices antiguos al iniciar backend
+- generación de friendCode al registrarse (no en generar-code)
+- Migración de friendCode de Friend a User collection
+
+---
+
+CÓMO TESTEAR AMIGOS Y NOTIFICACIONES
+-----------------------------------
+
+1. Abre 2 navegadores (ej: Chrome + Firefox)
+2. Crea Usuario A en navegador 1, Usuario B en navegador 2
+3. En Usuario A: obtén código con "Generar mi código"
+4. Copia el código
+5. En Usuario B: paste el código en "Agregar por código"
+6. Si la suscripción a push funciona, Usuario A recibirá notificación
+
+Si no ves notificación:
+- Verifica que ambos navegadores tengan permisos de notificación
+- Checa en DevTools → Application → Service Workers
+- Abre DevTools → Application → Storage → IndexedDB para ver datos offline
+
+================================================================================
