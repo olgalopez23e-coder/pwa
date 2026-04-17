@@ -67,13 +67,7 @@ app.use('/api/push', pushRoutes);
 
 // Rutas de estado
 app.get('/api/health', (req, res) => res.json({ status: 'operativo' }));
-app.get('/api/auth', (req, res) => res.send('Backend Pokédex vivo 🚀'));
-app.get('/api/pokemon', (req, res) => res.send('Backend Pokédex vivo 🚀'));
-app.get('/api/favorites', (req, res) => res.send('Backend Pokédex vivo 🚀'));
-app.get('/api/teams', (req, res) => res.send('Backend Pokédex vivo 🚀'));
-app.get('/api/friends', (req, res) => res.send('Backend Pokédex vivo 🚀'));
-app.get('/api/battles', (req, res) => res.send('Backend Pokédex vivo 🚀'));
-app.get('/api/push', (req, res) => res.send('Backend Pokédex vivo 🚀'));
+app.get('/', (req, res) => res.send('Backend Pokédex vivo 🚀'));
 
 // Manejo de errores global
 app.use((err, req, res, next) => {
