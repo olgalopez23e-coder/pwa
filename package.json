@@ -1,4 +1,18 @@
 {
+  "name": "pokemon-app",
+  "version": "1.0.0",
+  "description": "Pokédex App - Frontend + Backend",
+  "main": "index.js",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "cd frontend && npm run preview",
+    "dev": "cd frontend && npm run dev",
+    "install-frontend": "cd frontend && npm install",
+    "postinstall": "npm run install-frontend"
+  },
+  "engines": {
+    "node": "18.x"
+  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18"
   },
