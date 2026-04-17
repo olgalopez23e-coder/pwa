@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "PokéPWA - Pokédex Progressive Web App",
+  "short_name": "PokéPWA",
+  "description": "Aplicación web progresiva para explorar, coleccionar y batallar con Pokémon. Acceso offline, notificaciones push y experiencia de aplicación nativa.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#ff0000",
+  "categories": ["entertainment", "games"],
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "form_factor": "narrow",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "form_factor": "wide",
+      "type": "image/png"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Explorar Pokédex",
+      "short_name": "Explorar",
+      "description": "Explora y descubre todos los Pokémon",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Mis Favoritos",
+      "short_name": "Favoritos",
+      "description": "Accede a tus Pokémon favoritos",
+      "url": "/favoritos",
+      "icons": [
+        {
+          "src": "/icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Mis Equipos",
+      "short_name": "Equipos",
+      "description": "Gestiona tus equipos de batalla",
+      "url": "/equipos",
+      "icons": [
+        {
+          "src": "/icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
