@@ -15,8 +15,8 @@
 
       <div class="navbar-links links-shell">
         <router-link to="/" class="nav-link">Explorar</router-link>
-        
-        <template v-if="isLoggedIn">
+
+        <div v-if="isLoggedIn" class="auth-links">
           <router-link to="/favoritos" class="nav-link">Favoritos</router-link>
           <router-link to="/equipos" class="nav-link">Equipos</router-link>
           <router-link to="/amigos" class="nav-link">Amigos</router-link>
@@ -24,14 +24,14 @@
           <button @click="handleLogout" class="nav-link logout-btn">
             Salir
           </button>
-        </template>
-        
-        <template v-else>
+        </div>
+
+        <div v-else class="auth-links">
           <router-link to="/login" class="nav-link">Entrar</router-link>
           <router-link to="/register" class="nav-link register-btn">
             Unirse
           </router-link>
-        </template>
+        </div>
       </div>
     </nav>
 
