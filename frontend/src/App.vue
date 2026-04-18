@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <nav class="navbar">
-<<<<<<< HEAD
       <div class="navbar-brand brand-shell">
         <router-link to="/" class="brand-link">
           <span class="brand-ball" aria-hidden="true"></span>
@@ -15,14 +14,6 @@
       </div>
 
       <div class="navbar-links links-shell">
-=======
-      <div class="navbar-brand">
-        <router-link to="/" class="nav-link" style="font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-          <span>🔴</span> PokéPWA
-        </router-link>
-      </div>
-      <div class="navbar-links">
->>>>>>> 5ac1609e264fd44ad0d1ccdf2f3ad0075d804495
         <router-link to="/" class="nav-link">Explorar</router-link>
         
         <template v-if="isLoggedIn">
@@ -30,29 +21,20 @@
           <router-link to="/equipos" class="nav-link">Equipos</router-link>
           <router-link to="/amigos" class="nav-link">Amigos</router-link>
           <router-link to="/batallas" class="nav-link">Batallas</router-link>
-<<<<<<< HEAD
           <button @click="handleLogout" class="nav-link logout-btn">
-=======
-          <button @click="handleLogout" class="nav-link logout-btn" style="background: none; border: 1px solid rgba(255,255,255,0.3); cursor: pointer;">
->>>>>>> 5ac1609e264fd44ad0d1ccdf2f3ad0075d804495
             Salir
           </button>
         </template>
         
         <template v-else>
           <router-link to="/login" class="nav-link">Entrar</router-link>
-<<<<<<< HEAD
           <router-link to="/register" class="nav-link register-btn">
-=======
-          <router-link to="/register" class="nav-link register-btn" style="background: var(--color-white); color: var(--color-primary);">
->>>>>>> 5ac1609e264fd44ad0d1ccdf2f3ad0075d804495
             Unirse
           </router-link>
         </template>
       </div>
     </nav>
 
-<<<<<<< HEAD
     <section v-if="isOffline" class="offline-banner" role="status" aria-live="polite">
       <img
         class="offline-ivysaur"
@@ -62,8 +44,6 @@
       <p class="offline-text">Se perdio la conexion, conectate para guardar cambios.</p>
     </section>
 
-=======
->>>>>>> 5ac1609e264fd44ad0d1ccdf2f3ad0075d804495
     <main class="container">
       <router-view />
     </main>
@@ -77,7 +57,6 @@ import { requestNotificationPermission } from './services/notifications';
 
 const router = useRouter();
 const isLoggedIn = ref(!!localStorage.getItem('token'));
-<<<<<<< HEAD
 const isOffline = ref(false);
 
 const handleOffline = () => {
@@ -87,8 +66,6 @@ const handleOffline = () => {
 const handleOnline = () => {
   isOffline.value = false;
 };
-=======
->>>>>>> 5ac1609e264fd44ad0d1ccdf2f3ad0075d804495
 
 const updateAuth = () => {
   isLoggedIn.value = !!localStorage.getItem('token');
@@ -103,12 +80,9 @@ const handleLogout = () => {
 
 onMounted(async () => {
   window.addEventListener('auth-change', updateAuth);
-<<<<<<< HEAD
   window.addEventListener('offline', handleOffline);
   window.addEventListener('online', handleOnline);
   isOffline.value = !navigator.onLine;
-=======
->>>>>>> 5ac1609e264fd44ad0d1ccdf2f3ad0075d804495
   
   const granted = await requestNotificationPermission();
   if (granted) {
@@ -118,16 +92,12 @@ onMounted(async () => {
 
 onUnmounted(() => {
   window.removeEventListener('auth-change', updateAuth);
-<<<<<<< HEAD
   window.removeEventListener('offline', handleOffline);
   window.removeEventListener('online', handleOnline);
-=======
->>>>>>> 5ac1609e264fd44ad0d1ccdf2f3ad0075d804495
 });
 </script>
 
 <style>
-<<<<<<< HEAD
 /* Navbar refinado para una estética Pokemon más moderna */
 .brand-shell {
   padding: 0.15rem;
@@ -266,15 +236,5 @@ onUnmounted(() => {
     font-size: 0.9rem;
     line-height: 1.25;
   }
-=======
-/* Los estilos globales ya están en style.css */
-.logout-btn:hover {
-  background-color: rgba(255,255,255,0.1) !important;
-}
-
-.register-btn:hover {
-  background-color: #eee !important;
-  color: var(--color-primary) !important;
->>>>>>> 5ac1609e264fd44ad0d1ccdf2f3ad0075d804495
 }
 </style>
