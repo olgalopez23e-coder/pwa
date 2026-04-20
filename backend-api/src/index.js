@@ -66,8 +66,8 @@ app.use('/api/battles', battlesRoutes);
 app.use('/api/push', pushRoutes);
 
 // Rutas de estado
-app.get('/api/health', (req, res) => res.json({ status: 'operativo' }));
-app.get('/', (req, res) => res.send('Backend Pokédex vivo 🚀'));
+//app.get('/api/health', (req, res) => res.json({ status: 'operativo' }));
+//app.get('/', (req, res) => res.send('Backend Pokédex vivo 🚀'));
 
 // Manejo de errores global
 app.use((err, req, res, next) => {
