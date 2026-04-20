@@ -18,7 +18,7 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN || 'https://pwapokemon.up.railway.app',
   credentials: true
 }));
 
@@ -55,7 +55,6 @@ const connectDatabase = async () => {
     process.exit(1);
   }
 };
-app.get('/api/health', (req, res) => res.json({ status: 'operativo' }));
 // Rutas API
 app.use('/api/auth', authRoutes);
 app.use('/api/pokemon', pokemonRoutes);
