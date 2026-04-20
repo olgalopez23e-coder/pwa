@@ -55,7 +55,7 @@ const connectDatabase = async () => {
     process.exit(1);
   }
 };
-
+app.get('/api/health', (req, res) => res.json({ status: 'operativo' }));
 // Rutas API
 app.use('/api/auth', authRoutes);
 app.use('/api/pokemon', pokemonRoutes);
