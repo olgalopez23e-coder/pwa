@@ -99,6 +99,15 @@ onUnmounted(() => {
 
 <style>
 /* Navbar refinado para una estética Pokemon más moderna */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 1rem;
+}
+
 .brand-shell {
   padding: 0.15rem;
 }
@@ -106,135 +115,127 @@ onUnmounted(() => {
 .brand-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.75rem;
   text-decoration: none;
-  color: var(--color-white);
-  padding: 0.25rem 0.35rem;
+  color: var(--color-text-main);
+  font-weight: 800;
+  font-size: 1.5rem;
+  transition: var(--transition);
+}
+
+.brand-link:hover {
+  opacity: 0.9;
 }
 
 .brand-ball {
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, #ff9a95 0%, #ff3b30 45%, #b91c15 100%);
-  border: 1.5px solid rgba(255, 214, 10, 0.9);
-  box-shadow: 0 0 0 2px rgba(255, 214, 10, 0.18);
-}
-
-.brand-text {
-  letter-spacing: 1px;
+  border: 2px solid var(--color-text-main);
+  box-shadow: 0 0 15px rgba(255, 59, 48, 0.4);
 }
 
 .pikachu-run {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   image-rendering: pixelated;
-  filter: drop-shadow(0 0 6px rgba(255, 214, 10, 0.45));
+  filter: drop-shadow(0 0 8px rgba(255, 214, 10, 0.5));
 }
 
-.links-shell {
-  padding: 0.2rem;
-  border-radius: 12px;
-  background: rgba(7, 14, 26, 0.22);
+.navbar-links {
   display: flex;
-  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-.nav-link {
-  min-width: 82px;
-  text-align: center;
-}
-
-.navbar {
-  flex-direction: row;
-  justify-content: space-between;
+.auth-links {
+  display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.navbar-links {
-  justify-content: center;
+.nav-link {
+  text-decoration: none;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  transition: var(--transition);
+}
+
+.nav-link:hover, .nav-link.router-link-active {
+  color: var(--color-text-main);
+  background: var(--color-bg-card);
 }
 
 .logout-btn {
-  background: rgba(255, 59, 48, 0.14);
-  border: 1px solid rgba(255, 59, 48, 0.45);
+  background: rgba(255, 77, 94, 0.1);
+  color: #ff4d5e;
+  border: 1px solid rgba(255, 77, 94, 0.3);
   cursor: pointer;
 }
 
 .logout-btn:hover {
-  background-color: rgba(255, 59, 48, 0.24) !important;
+  background: rgba(255, 77, 94, 0.2);
+  border-color: #ff4d5e;
 }
 
 .register-btn {
-  background: linear-gradient(135deg, #ffe072 0%, #ffd60a 100%) !important;
-  color: #1b2a45 !important;
-  border: 1px solid rgba(255, 214, 10, 0.95) !important;
+  background: var(--color-primary) !important;
+  color: white !important;
+  border: none;
 }
 
 .register-btn:hover {
-  background: linear-gradient(135deg, #ffe98f 0%, #ffdf3c 100%) !important;
-  color: #14213d !important;
+  background: var(--color-primary-hover) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 77, 94, 0.4);
 }
 
 .offline-banner {
-  margin: 0.75rem auto 0;
-  width: min(980px, calc(100% - 2rem));
+  margin: 1rem 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding: 0.7rem 1rem;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 59, 48, 0.55);
-  background: linear-gradient(90deg, rgba(86, 16, 16, 0.9) 0%, rgba(120, 18, 18, 0.9) 100%);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
+  border: 1px solid #991b1b;
+  box-shadow: var(--shadow-lg);
+  animation: slideIn 0.4s ease-out;
 }
 
-.offline-ivysaur {
-  width: 34px;
-  height: 34px;
-  image-rendering: pixelated;
-  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.35));
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .offline-text {
   margin: 0;
-  color: #ffe5e5;
+  color: #fecaca;
   font-weight: 700;
-  letter-spacing: 0.2px;
+  font-size: 0.95rem;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .navbar {
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
+    padding: 1rem 0;
+    gap: 1.5rem;
   }
 
-  .links-shell {
-    width: auto;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
+  .navbar-links {
+    width: 100%;
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
 
   .nav-link {
-    min-width: 74px;
-  }
-
-  .offline-banner {
-    margin-top: 0.55rem;
-    width: calc(100% - 1rem);
-    padding: 0.6rem 0.75rem;
-    justify-content: flex-start;
-  }
-
-  .offline-text {
     font-size: 0.9rem;
-    line-height: 1.25;
+    padding: 0.4rem 0.75rem;
   }
 }
-</style>
+</style>

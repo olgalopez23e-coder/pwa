@@ -1,38 +1,36 @@
 <template>
   <div class="home-view">
-    <header class="view-header" style="margin-bottom: 2rem;">
-      <h1 style="font-size: 2.3rem; color: #ff4d5e; margin-bottom: 0.8rem; text-shadow: 0 0 18px rgba(225,29,47,0.25);">Explorar Pokédex</h1>
-      <p style="color: var(--color-text-muted);">Encuentra y colecciona todos tus Pokémon favoritos.</p>
+    <header class="view-header">
+      <h1>Explorar Pokédex</h1>
+      <p>Encuentra y colecciona todos tus Pokémon favoritos en esta PWA moderna.</p>
     </header>
 
     <!-- Dashboard de Filtros -->
-    <section class="filters" style="background: linear-gradient(170deg, #161d2d 0%, #111827 100%); border: 1px solid var(--color-border); padding: 2rem; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 3rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
-      <div style="flex: 2; display: flex; gap: 0.5rem; min-width: 300px;">
+    <section class="filters glass">
+      <div class="search-box">
         <input 
           v-model="filters.name" 
           type="text" 
-          placeholder="Ej: 'pika', 'char', '1'..." 
+          placeholder="Nombre o ID del Pokémon..." 
           class="filter-input"
-          style="flex: 1; border-radius: 12px; padding: 0.8rem 1.2rem; border: 2px solid #2f3a52; outline: none; transition: border-color 0.3s;"
           @keyup.enter="handleSearch"
         />
         <button 
           @click="handleSearch" 
-          class="nav-link" 
-          style="background: var(--color-primary); border: none; padding: 0.8rem 1.5rem; border-radius: 12px; cursor: pointer; color: white; font-weight: bold; display: flex; align-items: center; gap: 0.5rem;"
+          class="search-btn"
           :disabled="loading"
         >
           <span>🔍</span> Buscar
         </button>
       </div>
       
-      <div style="flex: 1; display: flex; gap: 1rem; min-width: 300px;">
-        <select v-model="filters.type" class="filter-select" style="flex: 1; padding: 0.8rem; border-radius: 12px; border: 2px solid #2f3a52;" @change="handleSearch">
+      <div class="selectors-box">
+        <select v-model="filters.type" class="filter-select" @change="handleSearch">
           <option value="">Todos los Tipos</option>
           <option v-for="type in types" :key="type" :value="type">{{ type }}</option>
         </select>
 
-        <select v-model="filters.region" class="filter-select" style="flex: 1; padding: 0.8rem; border-radius: 12px; border: 2px solid #2f3a52;" @change="handleSearch">
+        <select v-model="filters.region" class="filter-select" @change="handleSearch">
           <option value="">Todas las Regiones</option>
           <option v-for="region in regions" :key="region" :value="region">{{ region }}</option>
         </select>
@@ -40,22 +38,22 @@
     </section>
 
     <!-- Grid de Resultados -->
-    <div v-if="loading" style="text-align: center; padding: 5rem;">
-      <div class="loader" style="width: 60px; height: 60px; border: 6px solid #2a344b; border-top: 6px solid var(--color-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: auto;"></div>
-      <p style="margin-top: 1.5rem; font-size: 1.2rem; color: var(--color-text-muted);">Buscando en la Pokédex...</p>
+    <div v-if="loading" class="loader-container">
+      <div class="loader"></div>
+      <p>Buscando en la Pokédex...</p>
     </div>
 
-    <div v-else-if="pokemons.length === 0" style="text-align: center; padding: 5rem; background: linear-gradient(170deg, #161d2d 0%, #111827 100%); border: 1px solid var(--color-border); border-radius: 20px;">
-      <span style="font-size: 4rem;">🚫</span>
-      <h2 style="margin-top: 1rem; color: #f2f5ff;">No se encontraron resultados</h2>
-      <p style="color: var(--color-text-muted);">Intenta con otros términos o filtros.</p>
-      <button @click="resetFilters" style="margin-top: 1.5rem; color: var(--color-primary); background: none; border: 2px solid var(--color-primary); padding: 0.8rem 1.5rem; border-radius: 12px; cursor: pointer; font-weight: bold;">Ver todos los Pokémon</button>
+    <div v-else-if="pokemons.length === 0" class="empty-state card">
+      <span class="empty-icon">🚫</span>
+      <h2>No se encontraron resultados</h2>
+      <p>Intenta con otros términos o filtros.</p>
+      <button @click="resetFilters" class="reset-btn">Ver todos los Pokémon</button>
     </div>
 
     <div v-else>
-      <div style="margin-bottom: 1.5rem; color: var(--color-text-muted); font-size: 0.9rem;">
+      <div class="results-meta">
         Mostrando {{ pokemons.length }} Pokémon 
-        <span v-if="totalResults > 0">(Total encontrados: {{ totalResults }})</span>
+        <span v-if="totalResults > 0"> de {{ totalResults }}</span>
       </div>
       
       <div class="pokemon-grid">
@@ -71,31 +69,28 @@
     </div>
 
     <!-- Paginación Mejorada -->
-    <div v-if="!loading && pokemons.length > 0 && totalResults > 20" style="display: flex; justify-content: center; align-items: center; gap: 2rem; margin-top: 4rem;">
+    <div v-if="!loading && pokemons.length > 0 && totalResults > 20" class="pagination">
       <button 
         :disabled="offset === 0" 
         @click="changePage(-20)" 
-        class="nav-link" 
-        style="width: 150px; text-align: center; border: none;"
-        :style="{ opacity: offset === 0 ? 0.5 : 1, cursor: offset === 0 ? 'default' : 'pointer', background: 'var(--color-primary)' }"
+        class="pagination-btn"
       >
         Anterior
       </button>
       
-      <span style="font-weight: bold; color: var(--color-text-muted);">{{ Math.floor(offset/20) + 1 }} / {{ Math.ceil(totalResults/20) }}</span>
+      <span class="page-info">{{ Math.floor(offset/20) + 1 }} / {{ Math.ceil(totalResults/20) }}</span>
 
       <button 
         :disabled="offset + 20 >= totalResults"
         @click="changePage(20)" 
-        class="nav-link" 
-        style="width: 150px; text-align: center; border: none;"
-        :style="{ opacity: offset + 20 >= totalResults ? 0.5 : 1, cursor: offset + 20 >= totalResults ? 'default' : 'pointer', background: 'var(--color-primary)' }"
+        class="pagination-btn"
       >
         Siguiente
       </button>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
@@ -217,17 +212,216 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.view-header {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.view-header h1 {
+  font-size: 3rem;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 25px rgba(255, 77, 94, 0.3);
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+
+.view-header p {
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+}
+
+.filters {
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  margin-bottom: 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.search-box {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.filter-input {
+  flex: 1;
+  background: var(--color-bg-deep);
+  border: 2px solid var(--color-border);
+  color: var(--color-text-main);
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  font-size: 1.1rem;
+  transition: var(--transition);
 }
 
 .filter-input:focus {
-  border-color: var(--color-primary) !important;
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255, 77, 94, 0.15);
+}
+
+.search-btn {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0 2rem;
+  border-radius: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-btn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 77, 94, 0.3);
+}
+
+.search-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.selectors-box {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.filter-select {
+  flex: 1;
+  background: var(--color-bg-deep);
+  border: 2px solid var(--color-border);
+  color: var(--color-text-main);
+  padding: 1rem;
+  border-radius: 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition);
 }
 
 .filter-select:focus {
-  border-color: var(--color-primary) !important;
+  border-color: var(--color-primary);
   outline: none;
 }
-</style>
+
+.loader-container {
+  text-align: center;
+  padding: 6rem 0;
+}
+
+.loader {
+  width: 64px;
+  height: 64px;
+  border: 5px solid var(--color-bg-card);
+  border-top: 5px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  margin: 0 auto 2rem;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.results-meta {
+  margin-bottom: 2rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.empty-icon {
+  font-size: 5rem;
+  filter: drop-shadow(0 0 20px rgba(255,255,255,0.1));
+}
+
+.empty-state h2 {
+  font-size: 2rem;
+  color: var(--color-text-main);
+}
+
+.reset-btn {
+  background: transparent;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  padding: 0.8rem 2rem;
+  border-radius: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.reset-btn:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3rem;
+  margin-top: 6rem;
+  padding-bottom: 4rem;
+}
+
+.pagination-btn {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  padding: 0.8rem 2.5rem;
+  border-radius: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(255, 77, 94, 0.05);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-weight: 800;
+  color: var(--color-text-muted);
+  font-family: monospace;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .selectors-box {
+    flex-direction: column;
+  }
+  
+  .view-header h1 {
+    font-size: 2rem;
+  }
+  
+  .filters {
+    padding: 1.5rem;
+  }
+}
+</style>
