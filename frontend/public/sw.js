@@ -23,7 +23,7 @@ const APP_SHELL = [
 // ============================================
 self.addEventListener('install', (event) => {
   console.log('🔧 Service Worker: instalando...');
-  
+
   event.waitUntil(
     Promise.all([
       // Cachear App Shell
@@ -31,7 +31,7 @@ self.addEventListener('install', (event) => {
         console.log('📦 App Shell cacheado');
         return cache.addAll(APP_SHELL);
       }).catch(err => console.error('Error al cachear App Shell:', err)),
-      
+
       // Pre-cachear recursos estáticos clave
       caches.open(CACHE_NAMES.static).then(cache => {
         const staticAssets = [
@@ -53,7 +53,7 @@ self.addEventListener('install', (event) => {
 // ============================================
 self.addEventListener('activate', (event) => {
   console.log('🚀 Service Worker: activando...');
-  
+
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
@@ -93,14 +93,20 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 2. API - Network First (intenta red, cae a caché)
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(networkFirstStrategy(request, CACHE_NAMES.api));
-    return;
-  }
+  fetch('https://lively-vitality-production.up.railway.app/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+
+  //if (url.pathname.startsWith('/api/')) {
+  // event.respondWith(networkFirstStrategy(request, CACHE_NAMES.api));
+  //return;
+  //}
 
   // 3. Imágenes PokéAPI - Cache First con red de fallback
-  if (url.hostname.includes('raw.githubusercontent.com') || 
-      url.hostname.includes('pokeapi.co')) {
+  if (url.hostname.includes('raw.githubusercontent.com') ||
+    url.hostname.includes('pokeapi.co')) {
     event.respondWith(cacheFirstStrategy(request, CACHE_NAMES.images));
     return;
   }
@@ -128,13 +134,13 @@ async function networkFirstStrategy(request, cacheName) {
   try {
     // Intentar obtener de la red
     const response = await fetch(request);
-    
+
     // Cachear la respuesta válida
     if (response && response.status === 200) {
       const cache = await caches.open(cacheName);
       cache.put(request, response.clone());
     }
-    
+
     return response;
   } catch (error) {
     // Si la red falla, usar caché
@@ -152,7 +158,7 @@ async function networkFirstStrategy(request, cacheName) {
     // Retornar respuesta genérica de error
     return new Response(
       JSON.stringify({ error: 'No hay conexión', offline: true }),
-      { 
+      {
         status: 503,
         statusText: 'Service Unavailable',
         headers: { 'Content-Type': 'application/json' }
@@ -174,16 +180,16 @@ async function cacheFirstStrategy(request, cacheName) {
   try {
     // Si no está en caché, obtener de la red
     const response = await fetch(request);
-    
+
     if (response && response.status === 200) {
       const cache = await caches.open(cacheName);
       cache.put(request, response.clone());
     }
-    
+
     return response;
   } catch (error) {
     console.warn(`⚠️ Error al cargar: ${request.url}`, error);
-    
+
     // Retornar un placeholder o error
     if (request.destination === 'image') {
       return new Response(
@@ -191,7 +197,7 @@ async function cacheFirstStrategy(request, cacheName) {
         { headers: { 'Content-Type': 'image/svg+xml' } }
       );
     }
-    
+
     return new Response('Recurso no disponible', { status: 404 });
   }
 }
@@ -201,7 +207,7 @@ async function cacheFirstStrategy(request, cacheName) {
 // ============================================
 self.addEventListener('sync', (event) => {
   console.log('🔄 Background Sync:', event.tag);
-  
+
   if (event.tag === 'sync-offline-requests') {
     event.waitUntil(retrySyncOfflineRequests());
   }
@@ -211,9 +217,9 @@ async function retrySyncOfflineRequests() {
   try {
     const db = await idb.openDB('poke-db', 1);
     const requests = await db.getAll('requests');
-    
+
     console.log(`📤 Intentando sincronizar ${requests.length} solicitudes offline...`);
-    
+
     for (let req of requests) {
       try {
         const response = await fetch(req.url, {
@@ -221,11 +227,11 @@ async function retrySyncOfflineRequests() {
           headers: req.headers,
           body: req.data ? JSON.stringify(req.data) : undefined
         });
-        
+
         if (response.ok) {
           await db.delete('requests', req.id);
           console.log(`✅ Sincronizado: ${req.url}`);
-          
+
           // Notificar al cliente
           self.clients.matchAll().then(clients => {
             clients.forEach(client => {
@@ -259,7 +265,7 @@ async function saveOfflineRequest(request) {
         }
       }
     });
-    
+
     let body = null;
     if (request.method !== 'GET') {
       try {
@@ -268,7 +274,7 @@ async function saveOfflineRequest(request) {
         body = null;
       }
     }
-    
+
     await db.add('requests', {
       url: request.url,
       method: request.method,
@@ -276,9 +282,9 @@ async function saveOfflineRequest(request) {
       data: body,
       timestamp: Date.now()
     });
-    
+
     console.log(`💾 Solicitud guardada offline: ${request.method} ${request.url}`);
-    
+
     // Registrar Background Sync si está disponible
     if ('serviceWorker' in navigator && 'SyncManager' in window) {
       const registration = await self.registration;
@@ -313,9 +319,9 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   console.log('Notificación clickeada:', event.action);
-  
+
   event.notification.close();
-  
+
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then(clientList => {
       // Buscar si ya existe una ventana abierta
