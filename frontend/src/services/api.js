@@ -2,8 +2,7 @@ import axios from 'axios';
 import { saveOfflineRequest } from './db';
 
 const api = axios.create({
-  ///rdfghjklkjhgfdsaedrtfgyhjkl,ñ.lkjhygtfrdesrdtfgyhujikoliuygtf
-  baseURL: import.meta.env.VITE_API_URL || 'https://lively-vitality-production.up.railway.app/api'
+  baseURL: import.meta.env.VITE_API_URL || '/api'
 });
 
 // Interceptor para manejar el token JWT
