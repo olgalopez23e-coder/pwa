@@ -35,9 +35,15 @@ export async function subscribeUserToPush() {
   
   if (subscription) return subscription;
 
-  const response = await fetch('/api/push/public-key'); // Supongamos que este endpoint existe
+  const response = await fetch('/api/push/public-key');
   const publicKey = await response.text();
-  const convertedVapidKey = urlBase64ToUint8Array(publicKey);
+  
+  if (!publicKey || publicKey.trim() === '' || publicKey.includes('<!DOCTYPE')) {
+    console.warn('⚠️ No se encontró una clave VAPID válida en el servidor.');
+    return null;
+  }
+
+  const convertedVapidKey = urlBase64ToUint8Array(publicKey.trim());
 
   return registration.pushManager.subscribe({
     userVisibleOnly: true,
