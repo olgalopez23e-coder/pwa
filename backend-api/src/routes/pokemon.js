@@ -10,20 +10,20 @@ let isInitialised = false;
 
 // Inicializar la lista maestra al arrancar (o primer uso)
 async function initMasterList() {
-  if (isInitialised) return;
+  if (isInitialised && masterPokemonList.length > 0) return;
   try {
-    console.log('📡 Cargando lista maestra de Pokémon para búsqueda inteligente...');
-    // Obtenemos los nombres e IDs de los primeros 1025 pokémon (hasta Gen 9)
-    const { data } = await axios.get(`${POKEAPI_URL}/pokemon?limit=1025`);
+    console.log('📡 [Backend] Solicitando lista maestra a PokéAPI...');
+    const { data } = await axios.get(`${POKEAPI_URL}/pokemon?limit=1025`, { timeout: 10000 });
     masterPokemonList = data.results.map((p, index) => ({
       id: index + 1,
       name: p.name,
       url: p.url
     }));
     isInitialised = true;
-    console.log(`✅ Lista maestra cargada: ${masterPokemonList.length} registros`);
+    console.log(`✅ [Backend] Lista maestra cargada con ${masterPokemonList.length} pokémon.`);
   } catch (error) {
-    console.error('❌ Fallo al inicializar lista maestra:', error.message);
+    console.error('❌ [Backend] Error al cargar lista maestra:', error.message);
+    // No marcamos como inicializado para reintentar en la próxima petición
   }
 }
 
@@ -78,13 +78,14 @@ router.get('/', async (req, res) => {
     // 3. Paginación ANTES de obtener detalles (para evitar 1000 requests)
     const paginated = filteredList.slice(Number(offset), Number(offset) + Number(limit));
 
-    // 4. Obtener DETALLES de los resultados paginados
+    console.log(`🔍 [Backend] Obteniendo detalles para ${paginated.length} pokémon...`);
     let pokemonDetails = await Promise.all(
       paginated.map(async (p) => {
         try {
-          const { data } = await axios.get(p.url);
+          const { data } = await axios.get(p.url, { timeout: 5000 });
           return data;
         } catch (e) {
+          console.error(`⚠️ Error al obtener detalle de ${p.name}:`, e.message);
           return null;
         }
       })

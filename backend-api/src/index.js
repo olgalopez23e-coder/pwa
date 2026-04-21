@@ -86,16 +86,12 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-const startServer = async () => {
-  try {
-    await connectDatabase();
-    app.listen(PORT, () => {
-      console.log(`🚀 Servidor en puerto ${PORT}`);
-    });
-  } catch (error) {
-    console.error('❌ Error al iniciar:', error.message);
-    process.exit(1);
-  }
-};
-
-startServer();
+// Iniciar servidor primero, conectar DB después para evitar bloqueos
+app.listen(PORT, () => {
+  console.log(`🚀 [Backend] Servidor encendido en el puerto ${PORT}`);
+  console.log(`🔗 [URL Local] http://localhost:${PORT}`);
+  
+  // Una vez encendido, intentamos conectar a la base de datos
+  console.log('🔄 [Backend] Intentando conectar a MongoDB Atlas...');
+  connectDatabase();
+});
