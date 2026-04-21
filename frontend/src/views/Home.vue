@@ -43,7 +43,7 @@
       <p>Buscando en la Pokédex...</p>
     </div>
 
-    <div v-else-if="pokemons.length === 0" class="empty-state card">
+    <div v-else-if="!pokemons || pokemons.length === 0" class="empty-state card">
       <span class="empty-icon">🚫</span>
       <h2>No se encontraron resultados</h2>
       <p>Intenta con otros términos o filtros.</p>
@@ -52,7 +52,7 @@
 
     <div v-else>
       <div class="results-meta">
-        Mostrando {{ pokemons.length }} Pokémon 
+        Mostrando {{ pokemons?.length || 0 }} Pokémon 
         <span v-if="totalResults > 0"> de {{ totalResults }}</span>
       </div>
       
@@ -69,7 +69,7 @@
     </div>
 
     <!-- Paginación Mejorada -->
-    <div v-if="!loading && pokemons.length > 0 && totalResults > 20" class="pagination">
+    <div v-if="!loading && pokemons?.length > 0 && totalResults > 20" class="pagination">
       <button 
         :disabled="offset === 0" 
         @click="changePage(-20)" 
@@ -117,7 +117,7 @@ const regions = ['kanto', 'johto', 'hoenn', 'sinnoh', 'unova', 'kalos', 'alola',
 const fetchTypes = async () => {
   try {
     const res = await api.get('/pokemon/types/list');
-    types.value = res.data.types;
+    types.value = res.data?.types || [];
   } catch (error) {
     console.error('Error al cargar tipos:', error);
   }
@@ -126,7 +126,7 @@ const fetchTypes = async () => {
 const fetchFavorites = async () => {
   try {
     const res = await api.get('/favorites');
-    favorites.value = res.data.favorites;
+    favorites.value = res.data?.favorites || [];
   } catch (error) {
     console.warn('No se pudieron cargar favoritos');
   }
@@ -144,8 +144,8 @@ const fetchPokemons = async () => {
     };
     
     const res = await api.get('/pokemon', { params });
-    pokemons.value = res.data.pokemon;
-    totalResults.value = res.data.total || 1025;
+    pokemons.value = res.data?.pokemon || [];
+    totalResults.value = res.data?.total || 1025;
   } catch (error) {
     console.error('Error al cargar pokémon:', error);
   } finally {

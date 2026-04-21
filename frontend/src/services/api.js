@@ -2,6 +2,8 @@ import axios from 'axios';
 import { saveOfflineRequest } from './db';
 
 const api = axios.create({
+  //ertyuihgtw3erty
+  //https://lively-vitality-production.up.railway.app/api
   baseURL: import.meta.env.VITE_API_URL || '/api'
 });
 
