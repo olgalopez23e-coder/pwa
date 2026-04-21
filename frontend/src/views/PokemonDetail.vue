@@ -8,7 +8,7 @@
     <div class="detail-container glass">
       
       <!-- Lado Izquierdo: Imagen y Tipos -->
-      <div class="detail-header" :class="`type-bg-${pokemon.types[0]}`">
+      <div v-if="pokemon.types && pokemon.types.length > 0" class="detail-header" :class="`type-bg-${pokemon.types[0]}`">
         <button @click="$router.back()" class="back-btn">
           <span class="back-icon">←</span> Volver
         </button>
@@ -89,7 +89,7 @@
         </div>
 
         <!-- Línea Evolutiva -->
-        <div v-if="pokemon.evolutionChain && pokemon.evolutionChain.length > 1" class="evolution-section">
+        <div v-if="pokemon.evolutionChain && pokemon.evolutionChain?.length > 1" class="evolution-section">
           <h3 class="subsection-title">Línea Evolutiva</h3>
           <div class="evolution-row glass">
             <template v-for="(name, index) in pokemon.evolutionChain" :key="name">
@@ -99,7 +99,7 @@
                 </div>
                 <div class="evolution-name">{{ name }}</div>
               </div>
-              <div v-if="index < pokemon.evolutionChain.length - 1" class="evolution-connector">
+              <div v-if="index < (pokemon.evolutionChain?.length || 0) - 1" class="evolution-connector">
                 <span class="arrow">➜</span>
               </div>
             </template>
@@ -137,7 +137,8 @@ const fetchPokemon = async () => {
 const checkFavorito = async () => {
   try {
     const res = await api.get('/favorites');
-    esFavorito.value = res.data.favorites.some(f => f.pokemonId === pokemon.value.id);
+    const favorites = res.data?.favorites || [];
+    esFavorito.value = favorites.some(f => f.pokemonId === pokemon.value?.id);
   } catch (error) {
     console.warn('No se pudo verificar favoritos');
   }

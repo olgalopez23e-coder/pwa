@@ -137,7 +137,7 @@ const fetchFavoritos = async () => {
   loading.value = true;
   try {
     const res = await api.get('/favorites');
-    favoritos.value = res.data.favorites;
+    favoritos.value = res.data?.favorites || [];
   } catch (error) {
     console.error('Error al cargar favoritos:', error);
   } finally {

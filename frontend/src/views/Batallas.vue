@@ -9,7 +9,7 @@
       <!-- Selección de Equipo -->
       <div class="setup-card">
         <h2>1. Selecciona tu Equipo</h2>
-        <div v-if="teams.length === 0" class="empty-state warning">
+        <div v-if="!teams || teams.length === 0" class="empty-state warning">
           <p>Debes crear un equipo en la sección <strong>Equipos</strong> antes de batallar.</p>
         </div>
         <div v-else class="option-list">
@@ -31,7 +31,7 @@
       <!-- Selección de Rival -->
       <div class="setup-card">
         <h2>2. Desafía a un Amigo</h2>
-        <div v-if="friends.length === 0" class="empty-state neutral">
+        <div v-if="!friends || friends.length === 0" class="empty-state neutral">
           <p>No tienes amigos agregados. Ve a la sección <strong>Amigos</strong>.</p>
         </div>
         <div v-else class="option-list">
@@ -133,12 +133,12 @@ const isAttacking = ref(false);
 
 const fetchTeams = async () => {
   const res = await api.get('/teams');
-  teams.value = res.data.teams;
+  teams.value = res.data?.teams || [];
 };
 
 const fetchFriends = async () => {
   const res = await api.get('/friends');
-  friends.value = res.data.friends;
+  friends.value = res.data?.friends || [];
 };
 
 const startBattle = () => {

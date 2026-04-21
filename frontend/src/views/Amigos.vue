@@ -29,13 +29,13 @@
 
       <!-- Lista de Amigos -->
       <section class="friends-list" style="background: linear-gradient(170deg, #161d2d 0%, #111827 100%); border: 1px solid var(--color-border); padding: 2rem; border-radius: 20px; box-shadow: var(--shadow);">
-        <h2 style="margin-bottom: 1.5rem; color: var(--color-text); border-bottom: 2px solid #2a344b; padding-bottom: 0.5rem;">Lista de Amigos ({{ friends.length }})</h2>
+        <h2 style="margin-bottom: 1.5rem; color: var(--color-text); border-bottom: 2px solid #2a344b; padding-bottom: 0.5rem;">Lista de Amigos ({{ friends?.length || 0 }})</h2>
         
         <div v-if="loading" style="text-align: center; padding: 3rem;">
           <div class="loader" style="width: 40px; height: 40px; border: 4px solid #2a344b; border-top: 4px solid var(--color-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: auto;"></div>
         </div>
 
-        <div v-else-if="friends.length === 0" style="text-align: center; padding: 3rem; color: var(--color-text-muted);">
+        <div v-else-if="!friends || friends.length === 0" style="text-align: center; padding: 3rem; color: var(--color-text-muted);">
           <span style="font-size: 3rem;">👋</span>
           <p style="margin-top: 1rem;">Aún no tienes amigos agregados.</p>
         </div>
@@ -76,7 +76,7 @@ const fetchFriends = async () => {
   loading.value = true;
   try {
     const res = await api.get('/friends');
-    friends.value = res.data.friends;
+    friends.value = res.data?.friends || [];
     if (res.data.myFriendCode && !myFriendCode.value) {
       myFriendCode.value = res.data.myFriendCode;
       localStorage.setItem('myFriendCode', myFriendCode.value);

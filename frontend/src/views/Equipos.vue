@@ -21,13 +21,13 @@
         </div>
 
         <div class="selection-display">
-          <label>Alineación ({{ selectedPokemons.length }}/6)</label>
+          <label>Alineación ({{ selectedPokemons?.length || 0 }}/6)</label>
           <div class="slots-container card">
             <div v-for="poke in selectedPokemons" :key="poke.id" class="poke-slot">
               <img :src="poke.image" class="slot-img" />
               <button @click="removeFromTeam(poke)" class="remove-slot-btn">×</button>
             </div>
-            <div v-if="selectedPokemons.length === 0" class="empty-slots">
+            <div v-if="!selectedPokemons || selectedPokemons.length === 0" class="empty-slots">
               Selecciona de tus favoritos
             </div>
           </div>
@@ -35,7 +35,7 @@
 
         <button 
           @click="saveTeam" 
-          :disabled="!newTeamName || selectedPokemons.length === 0" 
+          :disabled="!newTeamName || !selectedPokemons || selectedPokemons.length === 0" 
           class="save-team-btn"
         >
           Guardar Equipo
@@ -45,13 +45,13 @@
       <!-- Lista de Favoritos para Seleccionar -->
       <section class="favorites-selection">
         <h2 class="section-title">Tus Favoritos</h2>
-        <div v-if="favoritos.length === 0" class="empty-favs card">
+        <div v-if="!favoritos || favoritos.length === 0" class="empty-favs card">
           <p>No tienes favoritos para agregar.</p>
           <router-link to="/" class="link-btn">Ir a explorar</router-link>
         </div>
         <div v-else class="favs-grid card">
           <div v-for="poke in favoritos" :key="poke.pokemonId" @click="addToTeam(poke)" 
-               :class="['fav-pick', { 'already-selected': isSelected(poke.pokemonId) }, { 'full-team': selectedPokemons.length >= 6 }]">
+               :class="['fav-pick', { 'already-selected': isSelected(poke.pokemonId) }, { 'full-team': (selectedPokemons?.length || 0) >= 6 }]">
             <img :src="poke.pokemonData?.image" class="fav-pick-img" />
             <div class="fav-pick-name">{{ poke.pokemonName }}</div>
           </div>
@@ -62,7 +62,7 @@
     <!-- Mis Equipos Guardados -->
     <section class="saved-teams-section">
       <h2 class="section-title">Equipos Guardados</h2>
-      <div v-if="teams.length === 0" class="empty-saved card">
+      <div v-if="!teams || teams.length === 0" class="empty-saved card">
         Todavía no has creado ningún equipo experto.
       </div>
       <div v-else class="teams-grid">
@@ -94,7 +94,7 @@ const selectedPokemons = ref([]);
 const fetchFavoritos = async () => {
   try {
     const res = await api.get('/favorites');
-    favoritos.value = res.data.favorites;
+    favoritos.value = res.data?.favorites || [];
   } catch (error) {
     console.warn('No se pudo cargar favoritos');
   }
@@ -103,14 +103,14 @@ const fetchFavoritos = async () => {
 const fetchTeams = async () => {
   try {
     const res = await api.get('/teams');
-    teams.value = res.data.teams;
+    teams.value = res.data?.teams || [];
   } catch (error) {
     console.error('Error al cargar equipos:', error);
   }
 };
 
 const addToTeam = (poke) => {
-  if (selectedPokemons.value.length < 6 && !isSelected(poke.pokemonId)) {
+  if (selectedPokemons.value && selectedPokemons.value.length < 6 && !isSelected(poke.pokemonId)) {
     selectedPokemons.value.push({
       id: poke.pokemonId,
       name: poke.pokemonName,
