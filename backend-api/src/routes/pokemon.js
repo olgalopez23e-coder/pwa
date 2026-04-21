@@ -48,16 +48,25 @@ async function initMasterList() {
     console.log('📡 [Backend] Solicitando lista maestra completa a PokéAPI...');
     const { data } = await axios.get(`${POKEAPI_URL}/pokemon?limit=1025`, { timeout: 8000 });
     
-    masterPokemonList = data.results.map((p, index) => ({
-      id: index + 1,
-      name: p.name,
-      url: p.url
-    }));
-    isInitialised = true;
-    console.log(`✅ [Backend] Lista maestra actualizada: ${masterPokemonList.length} pokémon.`);
+    if (data && data.results && data.results.length > 0) {
+      // Solo sobreescribimos si recibimos datos reales
+      masterPokemonList = data.results.map((p, index) => ({
+        id: index + 1,
+        name: p.name,
+        url: p.url,
+        isFallback: false
+      }));
+      isInitialised = true;
+      console.log(`✅ [Backend] Lista maestra actualizada: ${masterPokemonList.length} pokémon.`);
+    } else {
+      throw new Error('La API respondió con una lista vacía');
+    }
   } catch (error) {
-    console.error('⚠️ [Backend] No se pudo actualizar la lista completa, usando lista de emergencia:', error.message);
-    // Mantenemos la lista fallback
+    console.error('⚠️ [Backend] No se pudo actualizar la lista completa, manteniendo lista de emergencia:', error.message);
+    // IMPORTANTE: Si falla, NO vaciamos masterPokemonList, se queda con los fallbacks
+    if (masterPokemonList.length === 0) {
+      masterPokemonList = [...fallbackPokemon];
+    }
   } finally {
     isRefreshing = false;
   }
