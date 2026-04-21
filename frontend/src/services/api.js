@@ -2,8 +2,6 @@ import axios from 'axios';
 import { saveOfflineRequest } from './db';
 
 const api = axios.create({
-  //ertyuihgtw3erty
-  //https://lively-vitality-production.up.railway.app/api
   baseURL: import.meta.env.VITE_API_URL || '/api'
 });
 
@@ -50,6 +48,13 @@ api.interceptors.response.use(
 
       return Promise.resolve({ data: { message: 'Petición guardada offline', offline: true } });
     }
+    console.error('❌ Error de API:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      message: error.message
+    });
+    return Promise.reject(error);
+  }
     return Promise.reject(error);
   }
 );
