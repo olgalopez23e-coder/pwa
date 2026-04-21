@@ -4,11 +4,12 @@
   "description": "Pokédex App - Frontend + Backend",
   "main": "index.js",
   "scripts": {
-    "build": "cd frontend && npm install && npm run build",
-    "start": "cd frontend && npm run preview",
-    "dev": "cd frontend && npm run dev",
+    "build": "npm run install-all && cd frontend && npm run build",
+    "start": "cd backend-api && npm start",
     "install-frontend": "cd frontend && npm install",
-    "postinstall": "npm run install-frontend"
+    "install-backend": "cd backend-api && npm install",
+    "install-all": "npm run install-frontend && npm run install-backend",
+    "postinstall": "npm run install-all"
   },
   "engines": {
     "node": "18.x"

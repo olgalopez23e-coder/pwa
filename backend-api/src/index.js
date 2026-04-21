@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const path = require('path');
 
 // Rutas
 const authRoutes = require('./routes/auth');
@@ -65,9 +66,17 @@ app.use('/api/friends', friendsRoutes);
 app.use('/api/battles', battlesRoutes);
 app.use('/api/push', pushRoutes);
 
+// Servir archivos estáticos del frontend en producción
+const frontendPath = path.join(__dirname, '../../frontend/dist');
+app.use(express.static(frontendPath));
+
 // Rutas de estado
-//app.get('/api/health', (req, res) => res.json({ status: 'operativo' }));
-//app.get('/', (req, res) => res.send('Backend Pokédex vivo 🚀'));
+app.get('/api/health', (req, res) => res.json({ status: 'operativo' }));
+
+// Para cualquier otra ruta, servir el index.html del frontend (Vue Router)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // Manejo de errores global
 app.use((err, req, res, next) => {
