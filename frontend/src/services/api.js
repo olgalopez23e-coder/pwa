@@ -48,15 +48,22 @@ api.interceptors.response.use(
 
       return Promise.resolve({ data: { message: 'Petición guardada offline', offline: true } });
     }
-    console.error('❌ Error de API:', {
-      url: error.config?.url,
-      status: error.response?.status,
-      message: error.message
-    });
+
+    // --- LOGS EXTENDIDOS PARA DEPURACIÓN EN PRODUCCIÓN ---
+    console.group('❌ Error de API');
+    console.error('URL:', error.config?.url);
+    console.error('Estado:', error.response?.status);
+    console.error('Mensaje:', error.message);
+    if (error.response?.data) {
+      console.error('Data del servidor:', error.response.data);
+    }
+    if (error.code === 'ERR_NETWORK') {
+      console.warn('💡 Sugerencia: El backend no parece estar respondiendo. Verifica si el servidor está encendido y si los CORS están configurados correctamente.');
+    }
+    console.groupEnd();
+
     return Promise.reject(error);
   }
-  //  return Promise.reject(error);
-  //}
 );
 
 export default api;

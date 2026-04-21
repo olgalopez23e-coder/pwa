@@ -20,9 +20,18 @@ router.post('/subscribe', protect, async (req, res) => {
   }
 });
 
-// GET /api/push/public-key - Obtener clave pública VAPID (opcional)
+// GET /api/push/public-key - Obtener clave pública VAPID
 router.get('/public-key', (req, res) => {
-  res.send(process.env.VAPID_PUBLIC_KEY || '');
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
+  
+  if (!publicKey) {
+    console.warn('⚠️ [Backend] Se solicitó la clave VAPID pero no está configurada en .env');
+    return res.status(404).send('Clave VAPID no configurada');
+  }
+
+  console.log('🔑 [Backend] Enviando clave pública VAPID');
+  res.set('Content-Type', 'text/plain');
+  res.send(publicKey);
 });
 
 module.exports = router;

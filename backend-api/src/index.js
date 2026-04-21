@@ -19,7 +19,14 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    const allowed = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['http://localhost:5173', 'http://127.0.0.1:5173'];
+    if (!origin || allowed.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS no permitido'));
+    }
+  },
   credentials: true
 }));
 
@@ -66,16 +73,39 @@ app.use('/api/friends', friendsRoutes);
 app.use('/api/battles', battlesRoutes);
 app.use('/api/push', pushRoutes);
 
+// --- DIAGNÓSTICOS DE PRODUCCIÓN (RAILWAY) ---
+const checkEnvVars = () => {
+  const criticalVars = ['MONGODB_URI', 'JWT_SECRET', 'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY'];
+  const missing = criticalVars.filter(v => !process.env[v]);
+  
+  if (missing.length > 0) {
+    console.warn('\n⚠️ [DIAGNÓSTICO] Faltan las siguientes variables de entorno:');
+    missing.forEach(v => console.warn(`   ❌ ${v}`));
+    console.warn('   Asegúrate de configurarlas en el panel de Railway (Settings > Variables).\n');
+  } else {
+    console.log('\n✅ [DIAGNÓSTICO] Todas las variables críticas están presentes.\n');
+  }
+};
+
 // Servir archivos estáticos del frontend en producción
 const frontendPath = path.join(__dirname, '../../frontend/dist');
-app.use(express.static(frontendPath));
+console.log(`📦 [Backend] Buscando frontend en: ${frontendPath}`);
 
-// Rutas de estado
-app.get('/api/health', (req, res) => res.json({ status: 'operativo' }));
+if (require('fs').existsSync(frontendPath)) {
+  app.use(express.static(frontendPath));
+  console.log('✅ [Backend] Directorio /dist encontrado. Serviendo frontend...');
+} else {
+  console.warn('⚠️ [Backend] Directorio /dist NO encontrado. Asegúrate de compilar el frontend con "npm run build".');
+}
 
 // Para cualquier otra ruta, servir el index.html del frontend (Vue Router)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+  const indexPath = path.join(frontendPath, 'index.html');
+  if (require('fs').existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).json({ error: 'Frontend no compilado. Ejecuta npm run build en la carpeta frontend.' });
+  }
 });
 
 // Manejo de errores global
@@ -93,5 +123,6 @@ app.listen(PORT, () => {
   
   // Una vez encendido, intentamos conectar a la base de datos
   console.log('🔄 [Backend] Intentando conectar a MongoDB Atlas...');
+  checkEnvVars();
   connectDatabase();
 });
