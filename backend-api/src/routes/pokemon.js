@@ -4,26 +4,62 @@ const router = express.Router();
 
 const POKEAPI_URL = process.env.POKEAPI_URL || 'https://pokeapi.co/api/v2';
 
-// Caché en memoria para la lista maestra de nombres
-let masterPokemonList = [];
+// Lista de Pokémon de emergencia (por si la API falla o está lenta)
+const fallbackPokemon = [
+  { id: 1, name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon/1' },
+  { id: 4, name: 'charmander', url: 'https://pokeapi.co/api/v2/pokemon/4' },
+  { id: 7, name: 'squirtle', url: 'https://pokeapi.co/api/v2/pokemon/7' },
+  { id: 25, name: 'pikachu', url: 'https://pokeapi.co/api/v2/pokemon/25' },
+  { id: 133, name: 'eevee', url: 'https://pokeapi.co/api/v2/pokemon/133' },
+  { id: 150, name: 'mewtwo', url: 'https://pokeapi.co/api/v2/pokemon/150' },
+  { id: 6, name: 'charizard', url: 'https://pokeapi.co/api/v2/pokemon/6' },
+  { id: 3, name: 'venusaur', url: 'https://pokeapi.co/api/v2/pokemon/3' },
+  { id: 9, name: 'blastoise', url: 'https://pokeapi.co/api/v2/pokemon/9' },
+  { id: 39, name: 'jigglypuff', url: 'https://pokeapi.co/api/v2/pokemon/39' },
+  { id: 52, name: 'meowth', url: 'https://pokeapi.co/api/v2/pokemon/52' },
+  { id: 1, name: 'bulbasaur', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png', types: ['grass', 'poison'] },
+  { id: 4, name: 'charmander', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png', types: ['fire'] },
+  { id: 7, name: 'squirtle', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png', types: ['water'] },
+  { id: 25, name: 'pikachu', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png', types: ['electric'] },
+  { id: 6, name: 'charizard', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png', types: ['fire', 'flying'] },
+  { id: 133, name: 'eevee', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png', types: ['normal'] },
+  { id: 150, name: 'mewtwo', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png', types: ['psychic'] },
+  { id: 3, name: 'venusaur', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/3.png', types: ['grass', 'poison'] },
+  { id: 9, name: 'blastoise', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png', types: ['water'] },
+  { id: 39, name: 'jigglypuff', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/39.png', types: ['normal', 'fairy'] }
+];
+
+let masterPokemonList = fallbackPokemon.map(p => ({
+  id: p.id,
+  name: p.name,
+  url: `${POKEAPI_URL}/pokemon/${p.id}`,
+  isFallback: true,
+  ...p
+}));
 let isInitialised = false;
+let isRefreshing = false;
 
 // Inicializar la lista maestra al arrancar (o primer uso)
 async function initMasterList() {
-  if (isInitialised && masterPokemonList.length > 0) return;
+  if (isRefreshing || (isInitialised && masterPokemonList.length > 22)) return;
+  
+  isRefreshing = true;
   try {
-    console.log('📡 [Backend] Solicitando lista maestra a PokéAPI...');
-    const { data } = await axios.get(`${POKEAPI_URL}/pokemon?limit=1025`, { timeout: 10000 });
+    console.log('📡 [Backend] Solicitando lista maestra completa a PokéAPI...');
+    const { data } = await axios.get(`${POKEAPI_URL}/pokemon?limit=1025`, { timeout: 8000 });
+    
     masterPokemonList = data.results.map((p, index) => ({
       id: index + 1,
       name: p.name,
       url: p.url
     }));
     isInitialised = true;
-    console.log(`✅ [Backend] Lista maestra cargada con ${masterPokemonList.length} pokémon.`);
+    console.log(`✅ [Backend] Lista maestra actualizada: ${masterPokemonList.length} pokémon.`);
   } catch (error) {
-    console.error('❌ [Backend] Error al cargar lista maestra:', error.message);
-    // No marcamos como inicializado para reintentar en la próxima petición
+    console.error('⚠️ [Backend] No se pudo actualizar la lista completa, usando lista de emergencia:', error.message);
+    // Mantenemos la lista fallback
+  } finally {
+    isRefreshing = false;
   }
 }
 
@@ -78,49 +114,41 @@ router.get('/', async (req, res) => {
     // 3. Paginación ANTES de obtener detalles (para evitar 1000 requests)
     const paginated = filteredList.slice(Number(offset), Number(offset) + Number(limit));
 
-    console.log(`🔍 [Backend] Obteniendo detalles para ${paginated.length} pokémon...`);
+    // 4. Obtener DETALLES de los resultados paginados
+    console.log(`🔍 [Backend] Procesando detalles para ${paginated.length} pokémon...`);
     let pokemonDetails = await Promise.all(
       paginated.map(async (p) => {
+        // Si ya es un dato de emergencia completo, lo usamos directamente
+        if (p.isFallback) return p;
+        
         try {
-          const { data } = await axios.get(p.url, { timeout: 5000 });
-          return data;
+          const { data } = await axios.get(p.url, { timeout: 4000 });
+          return {
+            id: data.id,
+            name: data.name,
+            image: data.sprites?.other?.['official-artwork']?.front_default || data.sprites?.front_default,
+            types: data.types.map(t => t.type.name),
+            height: data.height,
+            weight: data.weight,
+            stats: data.stats.map(s => ({ name: s.stat.name, value: s.base_stat }))
+          };
         } catch (e) {
-          console.error(`⚠️ Error al obtener detalle de ${p.name}:`, e.message);
-          return null;
+          console.error(`⚠️ Error al obtener detalle de ${p.name}, usando datos parciales:`, e.message);
+          return p.id ? p : null;
         }
       })
     );
     pokemonDetails = pokemonDetails.filter(p => p !== null);
 
-    // 5. Filtrar por TIPO (Si se requiere, sobre los detalles obtenidos)
-    // Nota: El tipo es el único filtro que requiere detalles previos, o una llamada extra.
-    // Para eficiencia, si el usuario selecciona SOLO tipo, podríamos usar axios.get(`${POKEAPI_URL}/type/${type}`)
-    if (type && !name && !region) {
-       const { data } = await axios.get(`${POKEAPI_URL}/type/${type.toLowerCase()}`);
-       const typePokemonUrls = data.pokemon.map(p => p.pokemon.url);
-       // Filtrar masterList por estas URLs y aplicar offset/limit
-       const typeList = masterPokemonList.filter(p => typePokemonUrls.includes(p.url));
-       const paginatedType = typeList.slice(Number(offset), Number(offset) + Number(limit));
-       
-       pokemonDetails = await Promise.all(
-         paginatedType.map(p => axios.get(p.url).then(r => r.data))
-       );
-    } else if (type) {
-      // Filtro combinado: ya tenemos detalles paginados, filtramos localmente
-      pokemonDetails = pokemonDetails.filter(p => 
-        p.types.some(t => t.type.name.toLowerCase() === type.toLowerCase())
-      );
-    }
-
-    // Formatear respuesta
+    // Formatear respuesta (ya vienen formateados o son fallbacks)
     const formatted = pokemonDetails.map(p => ({
       id: p.id,
       name: p.name,
-      image: p.sprites?.other?.['official-artwork']?.front_default || p.sprites?.front_default,
-      types: p.types.map(t => t.type.name),
-      height: p.height,
-      weight: p.weight,
-      stats: p.stats.map(s => ({ name: s.stat.name, value: s.base_stat }))
+      image: p.image || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`,
+      types: p.types || ['unknown'],
+      height: p.height || 0,
+      weight: p.weight || 0,
+      stats: p.stats || []
     }));
 
     res.json({ 
