@@ -2,7 +2,7 @@ import axios from 'axios';
 import { saveOfflineRequest } from './db';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+  baseURL: import.meta.env.VITE_API_URL || 'https://lively-vitality-production.up.railway.app/api'
 });
 
 // Interceptor para manejar el token JWT
@@ -39,13 +39,13 @@ api.interceptors.response.use(
         data: error.config.data,
         headers: error.config.headers
       });
-      
+
       // Registrar para Background Sync if supported
       if ('serviceWorker' in navigator && 'SyncManager' in window) {
         const registration = await navigator.serviceWorker.ready;
         await registration.sync.register('sync-requests');
       }
-      
+
       return Promise.resolve({ data: { message: 'Petición guardada offline', offline: true } });
     }
     return Promise.reject(error);
