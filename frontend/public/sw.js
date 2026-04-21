@@ -3,7 +3,7 @@ importScripts('https://cdn.jsdelivr.net/npm/idb@7/build/umd.js');
 // ============================================
 // CONFIGURACIÓN DE CACHÉS
 // ============================================
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const CACHE_NAMES = {
   appShell: `app-shell-${CACHE_VERSION}`,
   api: `api-cache-${CACHE_VERSION}`,
@@ -93,16 +93,11 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 2. API - Network First (intenta red, cae a caché)
-  fetch('https://lively-vitality-production.up.railway.app/api/auth/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
-  });
-
-  //if (url.pathname.startsWith('/api/')) {
-  // event.respondWith(networkFirstStrategy(request, CACHE_NAMES.api));
-  //return;
-  //}
+  // 2. API - Network First
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(networkFirstStrategy(request, CACHE_NAMES.api));
+    return;
+  }
 
   // 3. Imágenes PokéAPI - Cache First con red de fallback
   if (url.hostname.includes('raw.githubusercontent.com') ||
@@ -111,9 +106,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4. Recursos estáticos (.js, .css, etc) - Cache First
+  // 4. Recursos estáticos (.js, .css, etc) - Network First (para asegurar actualizaciones)
   if (/\.(js|css|woff|woff2|png|jpg|jpeg|svg|gif)$/.test(url.pathname)) {
-    event.respondWith(cacheFirstStrategy(request, CACHE_NAMES.static));
+    event.respondWith(networkFirstStrategy(request, CACHE_NAMES.static));
     return;
   }
 
