@@ -10,9 +10,9 @@ app.use(router)
 app.mount('#app')
 
 // ============================================
-// REGISTRO DEL SERVICE WORKER
+// REGISTRO DEL SERVICE WORKER (Solo en producción o si no es localhost)
 // ============================================
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
   navigator.serviceWorker.register('/sw.js')
     .then(registration => {
       console.log('✅ Service Worker registrado correctamente');

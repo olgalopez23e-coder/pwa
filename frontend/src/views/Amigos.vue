@@ -128,13 +128,12 @@ const inviteToBattle = (friend) => {
   alert(`Invitación de batalla enviada a ${friend.username} (Simulación)`);
 };
 
-onMounted(() => {
-  fetchFriends();
-  // Si no tenemos código, intentamos obtenerlo del perfil si ya existe en DB
+onMounted(async () => {
+  await fetchFriends();
+  // Si después de cargar amigos seguimos sin código, lo generamos automáticamente
   if (!myFriendCode.value) {
-    api.get('/friends').then(res => {
-        // En un sistema real, el código vendría con el perfil o habría un endpoint dedicado
-    });
+    console.log('🔄 Generando código de amigo automático...');
+    generateCode();
   }
 });
 </script>
