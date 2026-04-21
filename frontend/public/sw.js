@@ -87,7 +87,12 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // 1. Ignorar solicitudes no-GET
+  // 1. Ignorar solicitudes que no sean HTTP/HTTPS (extensiones del navegador)
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
+  // 2. Ignorar solicitudes no-GET
   if (request.method !== 'GET') {
     return;
   }
