@@ -51,16 +51,29 @@ const connectDatabase = async () => {
 
   if (!mongoURI) {
     console.error('❌ ERROR: No se encontró MONGODB_URI en las variables de entorno.');
-    process.exit(1);
+    return; // allow server to start for diagnostics
   }
 
   try {
-    await mongoose.connect(mongoURI);
-    console.log('✅ Conectado exitosamente a MongoDB Atlas');
+    console.log('🔄 [Backend] Conectando a MongoDB Atlas...');
+    await mongoose.connect(mongoURI, { serverSelectionTimeoutMS: 5000 });
+    console.log('✅ [Backend] Conectado exitosamente a MongoDB Atlas');
     await cleanupLegacyFriendsData();
   } catch (err) {
-    console.error('❌ Error de conexión a MongoDB:', err.message);
-    process.exit(1);
+    console.error('❌ [Backend] Error de conexión a MongoDB:', err.message);
+    console.warn('💡 Tip: Verifica que la IP de Railway esté permitida en el Access List de MongoDB Atlas (0.0.0.0/0 recomendado).');
+  }
+};
+
+// Sanity Check: PokéAPI
+const checkExternalApis = async () => {
+  const pokeApiUrl = process.env.POKEAPI_URL || 'https://pokeapi.co/api/v2';
+  try {
+    const axios = require('axios');
+    await axios.get(`${pokeApiUrl}/pokemon/1`, { timeout: 3000 });
+    console.log('✅ [Backend] Conectividad con PokéAPI: OK');
+  } catch (err) {
+    console.error('❌ [Backend] Error al conectar con PokéAPI:', err.message);
   }
 };
 app.get('/api/health', (req, res) => res.json({ status: 'operativo' }));
@@ -122,7 +135,8 @@ app.listen(PORT, () => {
   console.log(`🔗 [URL Local] http://localhost:${PORT}`);
   
   // Una vez encendido, intentamos conectar a la base de datos
-  console.log('🔄 [Backend] Intentando conectar a MongoDB Atlas...');
+  console.log('🔄 [Backend] Iniciando diagnósticos de arranque...');
   checkEnvVars();
+  checkExternalApis();
   connectDatabase();
 });
