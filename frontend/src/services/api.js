@@ -50,13 +50,18 @@ api.interceptors.response.use(
     }
     console.error('❌ Error de API:', {
       url: error.config?.url,
+      method: error.config?.method,
       status: error.response?.status,
+      data: error.response?.data,
       message: error.message
     });
+
+    if (error.response?.status === 0) {
+      console.warn('⚠️ No se pudo contactar con el servidor. Verifica que el backend esté encendido y que el CORS esté permitido.');
+    }
+
     return Promise.reject(error);
   }
-  //  return Promise.reject(error);
-  //}
 );
 
 export default api;

@@ -1,5 +1,27 @@
 require('dotenv').config();
 const express = require('express');
+
+// Función de diagnóstico de variables de entorno
+const checkEnvVars = () => {
+  const required = ['MONGODB_URI', 'JWT_SECRET', 'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY'];
+  console.log('🔍 [Backend] Verificando configuración...');
+  
+  required.forEach(v => {
+    if (!process.env[v]) {
+      console.warn(`⚠️ ALERTA: Falta la variable de entorno [${v}]. Esto podría causar fallos en producción.`);
+    } else {
+      console.log(`✅ [${v}] configurado.`);
+    }
+  });
+
+  if (process.env.NODE_ENV === 'production') {
+    console.log('🚀 Ejecutando en modo PRODUCCIÓN');
+  } else {
+    console.log('🚧 Ejecutando en modo DESARROLLO');
+  }
+};
+
+checkEnvVars();
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -87,9 +109,10 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 // Iniciar servidor primero, conectar DB después para evitar bloqueos
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 [Backend] Servidor encendido en el puerto ${PORT}`);
   console.log(`🔗 [URL Local] http://localhost:${PORT}`);
+  console.log(`📂 [Frontend Static] Sirviendo desde: ${frontendPath}`);
   
   // Una vez encendido, intentamos conectar a la base de datos
   console.log('🔄 [Backend] Intentando conectar a MongoDB Atlas...');
