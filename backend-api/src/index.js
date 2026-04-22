@@ -22,20 +22,32 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 app.use(cors({
   origin: (origin, callback) => {
+    // 1. Permitir solicitudes sin origen (como apps móviles o curl)
+    if (!origin) return callback(null, true);
+
+    // 2. Obtener lista de permitidos
     const allowed = process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
-      : ['http://localhost:5173', 'http://127.0.0.1:5173'];
+      : [];
 
-    if (!origin || allowed.includes(origin) || process.env.NODE_ENV === 'development') {
+    // 3. Lógica de validación ultra-robusta
+    const isAllowed = 
+      allowed.includes(origin) || 
+      allowed.includes('*') ||
+      origin.endsWith('.up.railway.app') || 
+      process.env.NODE_ENV === 'development';
+
+    if (isAllowed) {
       callback(null, true);
     } else {
-      console.warn(`🚨 CORS Bloqueado para origen: ${origin}`);
-      console.log(`📡 Orígenes permitidos: ${allowed.join(', ')}`);
+      console.warn(`🚨 CORS bloqueado para: ${origin}`);
       callback(null, false);
     }
   },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 
 // ================= FUNCIONES =================
