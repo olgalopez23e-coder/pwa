@@ -2,7 +2,10 @@ const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 
-const POKEAPI_URL = process.env.POKEAPI_URL || 'https://pokeapi.co/api/v2';
+let POKEAPI_URL = process.env.POKEAPI_URL || 'https://pokeapi.co/api/v2';
+if (POKEAPI_URL.endsWith('pokeapi.co')) {
+  POKEAPI_URL = `${POKEAPI_URL}/api/v2`;
+}
 
 // Lista de Pokémon de emergencia (por si la API falla o está lenta)
 const fallbackPokemon = [

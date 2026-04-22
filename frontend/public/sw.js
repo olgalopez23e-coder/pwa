@@ -143,10 +143,12 @@ async function networkFirstStrategy(request, cacheName) {
 
     return response;
   } catch (error) {
+    console.error(`❌ [SW] Error de red en ${request.url}:`, error);
+
     // Si la red falla, usar caché
     const cached = await caches.match(request);
     if (cached) {
-      console.log(`📦 Usando caché (offline): ${request.url}`);
+      console.log(`📦 [SW] Usando caché (offline): ${request.url}`);
       return cached;
     }
 
@@ -155,13 +157,17 @@ async function networkFirstStrategy(request, cacheName) {
       await saveOfflineRequest(request);
     }
 
-    // Retornar respuesta genérica de error
+    // Retornar respuesta genérica de error con cabeceras CORS para evitar bloqueos del navegador
     return new Response(
-      JSON.stringify({ error: 'No hay conexión', offline: true }),
+      JSON.stringify({ error: 'No hay conexión', offline: true, details: error.message }),
       {
         status: 503,
         statusText: 'Service Unavailable',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': 'true'
+        }
       }
     );
   }
@@ -188,17 +194,27 @@ async function cacheFirstStrategy(request, cacheName) {
 
     return response;
   } catch (error) {
-    console.warn(`⚠️ Error al cargar: ${request.url}`, error);
+    console.warn(`⚠️ [SW] Error al cargar: ${request.url}`, error);
 
-    // Retornar un placeholder o error
+    // Retornar un placeholder o error con cabeceras CORS
     if (request.destination === 'image') {
       return new Response(
         '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="#f0f0f0" width="100" height="100"/></svg>',
-        { headers: { 'Content-Type': 'image/svg+xml' } }
+        { 
+          headers: { 
+            'Content-Type': 'image/svg+xml',
+            'Access-Control-Allow-Origin': '*'
+          } 
+        }
       );
     }
 
-    return new Response('Recurso no disponible', { status: 404 });
+    return new Response('Recurso no disponible', { 
+      status: 404,
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
   }
 }
 
