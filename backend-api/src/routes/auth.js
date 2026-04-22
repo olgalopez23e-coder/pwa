@@ -25,7 +25,7 @@ router.post('/register', [
       return res.status(400).json({ error: errors.array()[0].msg });
     }
 
-    const { email, password } = req.body;
+    const { email, password, username: chosenUsername } = req.body;
 
     // Verificar si el usuario ya existe
     let usuario = await User.findOne({ email });
@@ -37,7 +37,7 @@ router.post('/register', [
     usuario = new User({
       email,
       password,
-      username: email.split('@')[0],
+      username: chosenUsername || email.split('@')[0],
       friendCode: uuidv4().split('-')[0].toUpperCase()
     });
 

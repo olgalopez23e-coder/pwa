@@ -40,6 +40,17 @@
           />
         </div>
 
+        <div class="form-group">
+          <label>Confirmar Contraseña</label>
+          <input 
+            v-model="confirmPassword" 
+            type="password" 
+            placeholder="••••••••" 
+            required 
+            class="auth-input" 
+          />
+        </div>
+
         <div v-if="error" class="error-message">{{ error }}</div>
 
         <button type="submit" :disabled="loading" class="auth-submit-btn">
@@ -77,6 +88,7 @@ const handleRegister = async () => {
   error.value = '';
   try {
     const res = await api.post('/auth/register', {
+      username: username.value,
       email: email.value,
       password: password.value
     });

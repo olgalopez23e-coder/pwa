@@ -23,16 +23,19 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors({
   origin: (origin, callback) => {
     const allowed = process.env.CORS_ORIGIN
-      ? process.env.CORS_ORIGIN.split(',')
+      ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
       : ['http://localhost:5173', 'http://127.0.0.1:5173'];
 
     if (!origin || allowed.includes(origin) || process.env.NODE_ENV === 'development') {
       callback(null, true);
     } else {
-      callback(new Error('CORS no permitido'));
+      console.warn(`🚨 CORS Bloqueado para origen: ${origin}`);
+      console.log(`📡 Orígenes permitidos: ${allowed.join(', ')}`);
+      callback(null, false);
     }
   },
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 
 // ================= FUNCIONES =================
