@@ -82,7 +82,10 @@ const connectDatabase = async () => {
 
 // Verificar PokéAPI
 const checkExternalApis = async () => {
-  const pokeApiUrl = process.env.POKEAPI_URL || 'https://pokeapi.co/api/v2';
+  let pokeApiUrl = process.env.POKEAPI_URL || 'https://pokeapi.co/api/v2';
+  if (pokeApiUrl.endsWith('pokeapi.co')) {
+    pokeApiUrl = `${pokeApiUrl}/api/v2`;
+  }
   try {
     const axios = require('axios');
     await axios.get(`${pokeApiUrl}/pokemon/1`, { timeout: 3000 });
